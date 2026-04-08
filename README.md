@@ -1,226 +1,224 @@
-# DynamicDataTable for Godot 4
+# DynamicDataTable for Godot 4 中文说明
 
-DynamicDataTable is a GDScript plugin for Godot 4 that allows you to create and manage dynamic data tables easily and flexibly.
+`DynamicDataTable` 是一个适用于 Godot 4 的 GDScript 插件，用来快速创建和管理可交互的数据表格。
 
-![Table example](https://github.com/jospic/dynamicdatatable/blob/master/ex_table_1.png)
-*Table example*
+## 功能特性
 
-[![Some features](https://github.com/jospic/dynamicdatatable/blob/master/main_video_features_1.png)](https://www.youtube.com/watch?v=WT5OIcFDpVk)
+* 动态创建表格，自定义表头和数据
+* 支持动态调整列宽
+* 支持多种单元格类型
+* 字符串
+* 数字
+* 日期（格式：`dd/mm/yyyy`）
+* 进度条
+* 复选框
+* 图片 / 图标
+* 支持列排序（升序 / 降序）
+* 支持按列过滤
+* 支持双击单元格编辑
+* 支持多行选择
+* 支持每列独立设置文本对齐方式
+* 支持表头和单元格鼠标事件
+* 支持键盘操作
+* 上下方向键
+* PageUp / PageDown
+* Home / End
+* 支持通过 Inspector 自定义外观
+* 支持普通复选框列的“全选 / 单选模式”
+* 支持左侧“行选择专用勾选列”
+* 支持按钮列 / 编辑按钮列
+* 兼容 Godot 4.3 及以上版本
 
-*Click to see some features video*
- 
-## Features
+## 安装方法
 
-* Dynamically create tables with customizable headers and data.
-* Dynamic resizing column widths.
-* Support for various data types (strings, numbers, dates in the format dd/mm/yyyy, progressbars, checkboxes, images/icon).
-* Column sorting in ascending or descending order.
-* Filtering rows by column.
-* Cell edit mode by left mouse button double click
-* Multirows selection.
-* Independent horizontal alignment for columns (left, center or right).
-* Mouse events on headers and data cells.
-* Keyboard events on selected row (cursor up/down, page up/down, home, end).
-* Appearance customization through themes and styles.
-* Compatibility from Godot 4.3.
-* Checkbox column: optional header click select-all + single-select mode.
-* Button column: draw clickable buttons (e.g. edit button) via header tag.
-* Optional dedicated row-select checkbox column on the left, independent from your data columns.
+1. 下载插件压缩包
+2. 解压到你的 Godot 项目的 `addons` 目录下
+3. 打开 Godot，在 `Project Settings > Plugins` 中启用插件
 
-## Installation
+## 使用方法
 
-1.  Download the plugin as a ZIP archive.
-2.  Extract the archive to the `addons` folder of your Godot project.
-3.  Enable the plugin from the `Project Settings > Plugins` menu.
+1. 在场景中添加一个 `DynamicTable` 节点，通常作为 `Control` 的子节点
+2. 在外部脚本中准备表头数组和数据数组
+3. 调用 `set_headers()` 设置表头
+4. 调用 `set_data()` 设置数据
+5. 根据需要在 Inspector 中调整样式和行为
 
-## Usage
+或者：
 
-1.  Add a `DynamicDataTable` node to your scene, as child of a Control node.
-2.  Add script to Control node and create a data array representing the table rows.
-3.  Set the column headers using the `set_headers()` method.
-4.  Set the table data using the `set_data()` method.
-5.  Customize the table appearance through the Inspector properties.
+直接运行本仓库中的示例场景 `example.tscn`
 
-### Column tags (header syntax)
+## 表头标签写法
 
-Use `Header|tag` to add per-column behaviors:
+表头支持使用 `标题|标签1|标签2|标签3` 的形式，为某一列添加行为控制。
 
-* Alignment: `|l`, `|c`, `|r`
-* Progress bar: `|p` / `|progress`
-* Checkbox: `|check` / `|checkbox`
-* Image: `|image` (cell value must be a `Texture2D`)
-* Button: `|btn` / `|button`
-* Edit button: `|edit` (a special button; can optionally start editing on click via Inspector settings)
-* Disable sorting for a column: `|nosort`
-* Default first sort to ascending: `|sortasc`
-* Default first sort to descending: `|sortdesc`
-* Disable double-click editing for a column: `|noedit` / `|readonly`
-* Explicitly allow double-click editing: `|editable`
-* Text-only editing for a column: `|edittext`
-
-### Dedicated row-select column
-
-Enable `row_select_column_enabled` in the Inspector to show a built-in checkbox column at the far left.
-
-* This column is virtual: it does not consume an entry in `headers` and does not change your row data shape.
-* Click a row checkbox to select/deselect that row.
-* Click the header checkbox to select all / clear all when `row_select_header_toggle_all` is enabled.
-
-or
-
-Download this entire Godot Project and run the main scene (example.tscn)
-
-## Code Example
+例如：
 
 ```gdscript
+"Name|c|editable"
+"Age|c|r|sortdesc"
+"Completed|c|check|nosort"
+"Edit|c|edit"
+```
 
+### 对齐标签
+
+* `|l` 左对齐
+* `|c` 居中对齐
+* `|r` 右对齐
+
+### 类型标签
+
+* `|p` 或 `|progress`：进度条列
+* `|check` 或 `|checkbox`：复选框列
+* `|image`：图片列，单元格值必须是 `Texture2D`
+* `|btn` 或 `|button`：按钮列
+* `|edit`：编辑按钮列
+
+### 排序控制标签
+
+* `|sortasc`：首次点击表头时按升序排序
+* `|sortdesc`：首次点击表头时按降序排序
+* `|nosort`：禁用该列排序
+
+### 编辑控制标签
+
+* `|editable`：显式允许该列双击编辑
+* `|noedit`：禁用该列双击编辑
+* `|readonly`：只读，不允许双击编辑
+* `|edittext`：只允许文本类型内容进入编辑
+
+## 左侧行选择专用勾选列
+
+插件支持一个内置的左侧行选择列，可在 Inspector 中开启：
+
+* `row_select_column_enabled`
+* `row_select_column_width`
+* `row_select_header_toggle_all`
+* `row_select_header_tooltip`
+
+特点：
+
+* 这是一个“虚拟列”
+* 不占用 `headers` 的位置
+* 不影响你的数据结构
+* 点击某一行的勾选框可以选中 / 取消选中该行
+* 点击表头勾选框可以全选 / 清空所有选中行
+
+## 普通复选框列
+
+普通数据列中的复选框支持以下 Inspector 行为配置：
+
+* `checkbox_single_select`
+* `true`：同一列只能勾选一项，效果类似单选
+* `false`：允许多项勾选
+* `checkbox_header_toggle_all`
+* 是否允许点击该列表头进行全选 / 清空
+
+当前复选框视觉风格接近 Element UI：
+
+* 未勾选：浅灰底 + 灰边框
+* 已勾选：蓝底 + 白色对勾
+
+## 按钮列
+
+当列使用 `|btn`、`|button` 或 `|edit` 标签时，会绘制为按钮样式。
+
+支持信号：
+
+* `button_pressed(row, column)`
+
+说明：
+
+* `|edit` 是特殊按钮列
+* 是否点击按钮后自动进入编辑，由 Inspector 中的 `edit_button_starts_editing` 控制
+* `edit_button_target_column` 可指定按钮触发后编辑哪一列
+
+## 常用信号
+
+插件提供以下常用信号：
+
+* `cell_selected(row, column)`
+* `multiple_rows_selected(selected_row_indices)`
+* `cell_right_selected(row, column, mousepos)`
+* `header_clicked(column)`
+* `column_resized(column, new_width)`
+* `progress_changed(row, column, new_value)`
+* `cell_edited(row, column, old_value, new_value)`
+* `button_pressed(row, column)`
+
+## 常用 API
+
+### 基础接口
+
+* `set_headers(new_headers)`
+* `set_data(new_data)`
+* `ordering_data(column_index, ascending := true)`
+
+### 数据操作
+
+* `insert_row(index, row_data)`
+* `delete_row(index)`
+* `update_cell(row, column, value)`
+* `get_cell_value(row, column)`
+* `get_row_value(row)`
+
+### 选择与进度条
+
+* `set_selected_cell(row, column)`
+* `set_progress_value(row, column, value)`
+* `get_progress_value(row, column)`
+* `set_progress_colors(...)`
+
+## 示例
+
+```gdscript
 extends Control
 
-# Reference to dynamic table
 @onready var dynamic_table = $DynamicTable
-# Popups
-@onready var popup = $PopupMenu
-@onready var confirm_popup = $ConfirmationDialog
 @onready var ico = load("res://addons/dynamic_table/icon.png")
 
-var headers																				# array of columns header
-var data																				# array of data, rows and columns
-var current_selected_row = -1															# current selected row
-var current_multiple_selected_rows = -1													# current multiple selected_rows
-var multiple_selected_rows = null														# array o selected rows
+var headers
+var data
 
 func _ready():
-	# Set table header
-	headers = ["ID|C", "Name", "Lastname", "Age|r", "Job", "City", "Date", "Task|p", "Completed|check", "Icon|image"]
+	headers = [
+		"ID|c|sortasc",
+		"Name|c|editable",
+		"Age|r|noedit",
+		"Task|c|p",
+		"Completed|c|check",
+		"Icon|c|image",
+		"Edit|c|edit"
+	]
+
 	dynamic_table.set_headers(headers)
-	
-	# Example data
+
 	data = [
-		[1, "Michael", "Smith", 34, "Engineer", "London", "10/12/2005", 0.5, 1, ico],
-		[2, "Louis", "Johnson", 28, "Doctor", "New York", "05/11/2023", 0],
-		[3, "Ann", "Williams", 42, "Lawyer", "Tokyo", "18/03/2025", 0, 0],
-		[4, "John", "Brown", 31, "Teacher", "Sydney", "02/07/2024", 0, 0],
-		[5, "Frances", "Jones", 25, "Designer", "Paris", "29/09/2023", 0, 0],
-		[6, "Robert", "", 39, "Architect", "Berlin", "14/01/2026", 0, 0],
-		[7, "Lucy", "Davis", 36, "Accountant", "Madrid", "07/04/2024", 0, 0],
-		[8, "Mark", "Miller", 44, "Entrepreneur", "Toronto", "21/08/2025", 0, 0],
-		[9, "Paula", "Wilson", 29, "Journalist", "Rio de Janeiro", "10/12/2023", 0, 0],
-		[10, "Stephen", "Moore", 33, "Programmer", "Dubai", "30/11/2024", 0, 0],
-		[11, "Mark", "Jefferson", 31, "Dentist", "Lisbona", "10/02/2018", 0.47, 1],
-		[12, "James", "Taylor", 28, "Doctor", "Chicago", "03/06/2026", 0, 0],
-		[13, "Carmen", "Anderson", 42, "Lawyer", "Hong Kong", "25/02/2024", 0, 0],
-		[14, "John", "Thomas", 39, "Architect", "Amsterdam", "17/10/2025", 0, 0],
-		[15, "Paul", "Jackson", 44, "Entrepreneur", "Singapore", "09/05/2023", 0, 0],
-		[16, "Jennifer", "White", 29, "Journalist", "Cape Town", "01/03/2023", 0, 0],
-		[17, "Luke", "Harris", 33, "Programmer", "Seoul", "28/04/2023", 0, 0],
-		[18, "Peter", "Martin", 25, "Designer", "Mexico City", "11/08/2024", 0, 0],
-		[19, "Matthew", "Thompson", 39, "Architect", "Moscow", "13/09/2024", 0, 0],
-		[20, "Louise", "Garcia", 36, "Accountant", "Istanbul", "04/12/2025", 0, 0],
-		[21, "Matthew", "Martinez", 44, "Entrepreneur", "Buenos Aires", "06/01/2025", 0, 0],
-		[22, "Stephanie", "Robinson", 29, "Journalist", "Cairo", "22/07/2023", 0, 0],
-		[23, "Christopher", "Clark", 51, "Architect", "Tokyo", "12/05/2021", 0, 0],
-		[24, "Amanda", "Rodriguez", 33, "Graphic Designer", "Sydney", "11/03/2020", 0, 0],
-		[25, "Daniel", "Lewis", 47, "Software Engineer", "Berlin", "03/04/2023", 0, 0],
-		[26, "Victoria", "Lee", 28, "Marketing Specialist", "Toronto", "04/05/2021", 0, 0],
-		[27, "Joseph", "Walker", 55, "Professor", "London", "12/05/2021", 0, 0],
-		[28, "Ashley", "Young", 39, "Chef", "Paris", "22/05/2024", 0, 0],
-		[29, "Kevin", "Allen", 42, "Financial Analyst", "Mexico City", "08/02/2025", 0, 0],
-		[30, "Elizabeth", "King", 31, "Photographer", "Rome", "11/09/2020", 0, 0]
-	]	
+		[1, "Michael", 34, 0.5, true, ico, "Edit"],
+		[2, "Louis", 28, 0.2, false, ico, "Edit"]
+	]
 
-	# Insert data table
 	dynamic_table.set_data(data)
-	# Default sorted column 
-	dynamic_table.ordering_data(0, true)  # 0 -> ID column and true -> ascending order
-	
-	# Signals connections
+	dynamic_table.ordering_data(0, true)
+
+	dynamic_table.button_pressed.connect(_on_button_pressed)
 	dynamic_table.cell_selected.connect(_on_cell_selected)
-	dynamic_table.cell_right_selected.connect(_on_cell_right_selected)
-	dynamic_table.cell_edited.connect(_on_cell_edited)
-	dynamic_table.header_clicked.connect(_on_header_clicked)
-	dynamic_table.column_resized.connect(_on_column_resized)
-	dynamic_table.multiple_rows_selected.connect(_on_multiple_rows_selected)
 
-func _process(_delta):
-	if (Input.is_key_pressed(KEY_DELETE) and (current_selected_row >= 0 or current_multiple_selected_rows > 0)):  # add support deleting items from keyboard
-		_confirm_delete_rows()
-		
-# On selected cell callback
+func _on_button_pressed(row, column):
+	print("Button pressed:", row, column)
+
 func _on_cell_selected(row, column):
-	print("Cell selected on row ", row, ", column ", column, " Cell value: ", dynamic_table.get_cell_value(row, column), " Row value: ", dynamic_table.get_row_value(row))
-	current_selected_row = row
-	current_multiple_selected_rows = -1
-	
-# On right selected cell callback
-func _on_cell_right_selected(row, column, mouse_pos):
-	print("Cell right selected on row ", row, ", column ", column, " Mouse position x: ", mouse_pos.x, " y: ", mouse_pos.y)
-	if (row >= 0):		# ignore header cells
-		current_selected_row = row
-		popup.position = mouse_pos
-		if (data.size() == 0 or row == data.size()):
-			popup.set("item_1/disabled", true)
-			current_multiple_selected_rows = -1
-		else:
-			popup.set("item_1/disabled", false)
-		popup.show()
-		
-# On multiple rows selected
-func _on_multiple_rows_selected(rows: Array):
-	current_multiple_selected_rows = rows.size()		# number of current multiple rows selected
-	multiple_selected_rows = rows						# current multiple rows selected array
-	
-# On edited cell callback
-func _on_cell_edited(row, column, old_value, new_value):
-	print("Cell edited on row ", row, ", column ", column, " Old value: ", old_value, " New value: ", new_value)
-		
-# On clicked header cell callback
-func _on_header_clicked(column):
-	print("Header clicked on column ", column)
-	
-# On resized column callback
-func _on_column_resized(column, new_width):
-	print("Column ", column, " resized at width ", new_width)
+	print("Cell selected:", row, column)
+```
 
-# On pressed popup menu entry
-func _on_popup_menu_id_pressed(id: int) -> void:
-	if (id == 0):	# Insert data row
-		dynamic_table.insert_row(current_selected_row, [0, "----", "--------", "--", "-----", "-----", "01/01/2000", 0, 0])
-	else:			# Delete data row
-		_confirm_delete_rows()
-		
-# On confirm delete row(s)
-func _confirm_delete_rows():
-	var dialogtext = "Are you sure you want to delete %s?"
-	if (current_multiple_selected_rows > 0):
-		confirm_popup.dialog_text = dialogtext % ["these " + str(current_multiple_selected_rows) + " rows"]
-	else:
-		confirm_popup.dialog_text = dialogtext % "this row"
-	confirm_popup.show()
+## 说明补充
 
-# On delete confirmation 
-func _on_confirmation_dialog_confirmed() -> void:
-	if (current_multiple_selected_rows > 0):			# multiple rows
-		multiple_selected_rows.sort_custom(func(a, b): return a > b) 
-		for rowidx in range (0, multiple_selected_rows.size()):
-			dynamic_table.delete_row(multiple_selected_rows[rowidx])
-		multiple_selected_rows.clear()
-	else:
-		dynamic_table.delete_row(current_selected_row)	# single row
-	dynamic_table.set_selected_cell(-1, -1)				# cancel current selection
-		
+* 当前文本列默认会在列宽不足时显示省略号 `...`
+* 插件目前默认不会根据内容自动重新拉伸列宽，以保留手动设置的宽度
+* 如果你在 Inspector 中手动改过某些导出属性，Godot 会优先使用场景中保存的值
 
-```	
+## 支持开发
 
-## Support the Development
+如果你觉得这个插件有帮助，也可以支持原作者的持续维护与开发。
 
-This plugin is provided free of charge to the community. If you appreciate the work that has gone into its development and find it useful, please consider making a donation. Your support helps me dedicate more time to maintaining and improving this plugin, as well as creating new free resources.
-
-Any amount is greatly appreciated!
-
-My [Paypal donation link](https://www.paypal.me/donatejospic?locale.x=it_IT)
-
-BTC address: bc1quru9ev0y8hwzmdxcfrmqd3j53yaxdhvef53q7t
-
-ETH address: 0xdB5416934F4EfBA54c804a15f3F61542CD710333
-
-Thank you for your support!
+原 README 中提供了捐赠方式，可参考英文版 `README.md`
