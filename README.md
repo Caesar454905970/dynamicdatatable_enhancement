@@ -23,6 +23,9 @@ DynamicDataTable is a GDScript plugin for Godot 4 that allows you to create and 
 * Keyboard events on selected row (cursor up/down, page up/down, home, end).
 * Appearance customization through themes and styles.
 * Compatibility from Godot 4.3.
+* Checkbox column: optional header click select-all + single-select mode.
+* Button column: draw clickable buttons (e.g. edit button) via header tag.
+* Optional dedicated row-select checkbox column on the left, independent from your data columns.
 
 ## Installation
 
@@ -37,6 +40,31 @@ DynamicDataTable is a GDScript plugin for Godot 4 that allows you to create and 
 3.  Set the column headers using the `set_headers()` method.
 4.  Set the table data using the `set_data()` method.
 5.  Customize the table appearance through the Inspector properties.
+
+### Column tags (header syntax)
+
+Use `Header|tag` to add per-column behaviors:
+
+* Alignment: `|l`, `|c`, `|r`
+* Progress bar: `|p` / `|progress`
+* Checkbox: `|check` / `|checkbox`
+* Image: `|image` (cell value must be a `Texture2D`)
+* Button: `|btn` / `|button`
+* Edit button: `|edit` (a special button; can optionally start editing on click via Inspector settings)
+* Disable sorting for a column: `|nosort`
+* Default first sort to ascending: `|sortasc`
+* Default first sort to descending: `|sortdesc`
+* Disable double-click editing for a column: `|noedit` / `|readonly`
+* Explicitly allow double-click editing: `|editable`
+* Text-only editing for a column: `|edittext`
+
+### Dedicated row-select column
+
+Enable `row_select_column_enabled` in the Inspector to show a built-in checkbox column at the far left.
+
+* This column is virtual: it does not consume an entry in `headers` and does not change your row data shape.
+* Click a row checkbox to select/deselect that row.
+* Click the header checkbox to select all / clear all when `row_select_header_toggle_all` is enabled.
 
 or
 

@@ -8,16 +8,22 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="DynamicDataTable"
 run/main_scene="res://example.tscn"
-config/features=PackedStringArray("4.4", "GL Compatibility")
+config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [display]
 
-window/size/viewport_width=1200
+window/size/viewport_width=1400
+window/size/viewport_height=800
+window/size/mode=2
 
 [editor_plugins]
 

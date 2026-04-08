@@ -14,9 +14,26 @@ var current_multiple_selected_rows = -1													# current multiple selected_
 var multiple_selected_rows = null														# array o selected rows
 
 func _ready():
+	while $".".size.y <= 0:
+		await get_tree().process_frame
+	
+	
 	# Set table header
-	headers = ["ID|C", "Name", "Lastname", "Age|r", "Job", "City", "Date", "Task|p", "Completed|check", "Icon|image"]
+	headers = ["ID|C", "Name|C", "Lastname|C", "Age|C|r", "Job|C", "City|C", "Date|C", "Task|C|p", "Completed|C|check", "Icon|C|image", "Edit|C|edit"]
 	dynamic_table.set_headers(headers)
+	
+	var per_column_width :float=size.x / (headers.size())
+	var _column_widths=[]
+	for i in headers.size()+1:
+		_column_widths.append(per_column_width)
+		
+	dynamic_table._column_widths=_column_widths
+	dynamic_table._update_column_widths()
+ 
+
+	#获 组件的高度和宽度 用于设置 组件表格 的 高度和宽度(必须手动设置一下，不然表格内容无法正常显示)
+	$".".set_custom_minimum_size(size)
+	
 	
 	# Example data
 	data = [
@@ -64,6 +81,7 @@ func _ready():
 	dynamic_table.header_clicked.connect(_on_header_clicked)
 	dynamic_table.column_resized.connect(_on_column_resized)
 	dynamic_table.multiple_rows_selected.connect(_on_multiple_rows_selected)
+	dynamic_table.button_pressed.connect(_on_button_pressed)
 
 func _process(_delta):
 	if (Input.is_key_pressed(KEY_DELETE) and (current_selected_row >= 0 or current_multiple_selected_rows > 0)):  # add support deleting items from keyboard
@@ -104,6 +122,9 @@ func _on_header_clicked(column):
 # On resized column callback
 func _on_column_resized(column, new_width):
 	print("Column ", column, " resized at width ", new_width)
+
+func _on_button_pressed(row, column):
+	print("Button pressed on row ", row, ", column ", column)
 
 # On pressed popup menu entry
 func _on_popup_menu_id_pressed(id: int) -> void:
