@@ -21,7 +21,10 @@ signal button_pressed(row, column)
 @export var header_color: Color = Color("#000000")
 @export var header_filter_active_font_color: Color = Color(1.0, 1.0, 0.0)
 @export_group("Row selection column")
-@export var row_select_column_enabled: bool = true # Adds a dedicated checkbox column (not part of data).
+var _row_select_column_enabled_internal: bool = true
+@export var row_select_column_enabled: bool = true: # Adds a dedicated checkbox column (not part of data).
+	set = set_row_select_column_enabled,
+	get = is_row_select_column_enabled
 @export var row_select_column_width: float = 34.0
 @export var row_select_header_toggle_all: bool = true
 @export var row_select_header_tooltip: String = "Select rows"
@@ -116,6 +119,7 @@ var font_size = get_theme_default_font_size()
 
 func _ready():
 	self.focus_mode = Control.FOCUS_ALL # For input from keyboard
+	_row_select_column_enabled_internal = row_select_column_enabled
 	
 	_setup_editing_components()
 	_setup_filtering_components() 
@@ -136,6 +140,7 @@ func _ready():
 	add_child(_v_scroll)
 	
 	_update_column_widths()
+	_update_scrollbars()
 	
 	resized.connect(_on_resized)
 	gui_input.connect(_on_gui_input) # Manage input from keyboard whwn has focus control
@@ -173,6 +178,7 @@ func _on_resized():
 	queue_redraw()
 
 func _update_column_widths():
+	_normalize_column_width_arrays()
 	_total_columns = _data_column_count() + (1 if _has_row_select_column() else 0)
 	_column_widths.resize(_total_columns)
 	_min_column_widths.resize(_total_columns)
@@ -185,6 +191,51 @@ func _update_column_widths():
 		if vcol >= _column_widths.size() or _column_widths[vcol] == 0 or _column_widths[vcol] == null:
 			_column_widths[vcol] = default_minimum_column_width
 			_min_column_widths[vcol] = default_minimum_column_width
+
+func _normalize_column_width_arrays():
+	var data_column_count := _data_column_count()
+	if data_column_count <= 0:
+		return
+
+	if _has_row_select_column():
+		if _column_widths.size() == data_column_count:
+			var normalized_widths := [row_select_column_width]
+			normalized_widths.append_array(_column_widths)
+			_column_widths = normalized_widths
+
+		if _min_column_widths.size() == data_column_count:
+			var normalized_min_widths := [row_select_column_width]
+			normalized_min_widths.append_array(_min_column_widths)
+			_min_column_widths = normalized_min_widths
+		return
+
+	if _column_widths.size() == data_column_count + 1:
+		_column_widths.remove_at(0)
+	if _min_column_widths.size() == data_column_count + 1:
+		_min_column_widths.remove_at(0)
+
+func _apply_row_select_column_enabled_change(previous_enabled: bool) -> void:
+	_sync_focused_column_after_row_select_toggle(previous_enabled)
+	_update_column_widths()
+	fit_data_columns_to_control_width()
+	if _h_scroll != null and _v_scroll != null:
+		_update_scrollbars()
+	queue_redraw()
+
+func _sync_focused_column_after_row_select_toggle(previous_enabled: bool) -> void:
+	if _focused_col < 0:
+		return
+
+	if previous_enabled:
+		if _focused_col == 0:
+			_focused_col = 0 if _data_column_count() > 0 else -1
+		else:
+			_focused_col -= 1
+	else:
+		_focused_col = _focused_col + 1 if _data_column_count() > 0 else -1
+
+	if _focused_col >= _total_columns and _total_columns > 0:
+		_focused_col = _total_columns - 1
 
 func _is_date_string(value: String) -> bool:
 	var date_regex = RegEx.new()
@@ -393,6 +444,7 @@ func set_headers(new_headers: Array):
 	for header in new_headers: typed_headers.append(String(header))
 	headers = typed_headers
 	_update_column_widths()
+	fit_data_columns_to_control_width()
 	_update_scrollbars()
 	queue_redraw()
 
@@ -541,6 +593,37 @@ func set_progress_colors(bar_start_color: Color, bar_middle_color: Color, bar_en
 	progress_border_color = border_c
 	progress_text_color = text_c
 	queue_redraw()
+
+func set_row_select_column_enabled(enabled: bool) -> void:
+	if _row_select_column_enabled_internal == enabled:
+		return
+	var previous_enabled := _row_select_column_enabled_internal
+	_row_select_column_enabled_internal = enabled
+	_apply_row_select_column_enabled_change(previous_enabled)
+
+func is_row_select_column_enabled() -> bool:
+	return _row_select_column_enabled_internal
+
+func fit_data_columns_to_control_width() -> void:
+	var data_column_count := _data_column_count()
+	if data_column_count <= 0:
+		return
+
+	var available_width := size.x
+	if _v_scroll != null and _v_scroll.visible:
+		available_width -= _v_scroll.size.x
+	if _has_row_select_column():
+		available_width -= row_select_column_width
+	if available_width <= 0.0:
+		return
+
+	var per_column_width := available_width / float(data_column_count)
+	for data_col in range(data_column_count):
+		var visual_col := _data_to_visual_col(data_col)
+		if visual_col < 0:
+			continue
+		_column_widths[visual_col] = per_column_width
+		_min_column_widths[visual_col] = default_minimum_column_width
 
 #------------------------------------------------------------
 # END PUBLIC FUNCTIONS
