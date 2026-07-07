@@ -2,6 +2,11 @@
 extends Control
 class_name DynamicTable
 
+enum ThemeMode {
+	LIGHT,
+	DARK
+}
+
 # Signals
 signal cell_selected(row, column)
 signal multiple_rows_selected(selected_row_indices: Array)
@@ -15,6 +20,10 @@ signal button_pressed(row, column)
 # Table properties
 @export_group("Default color")
 @export var default_font_color: Color = Color(1.0, 1.0, 1.0)
+var _theme_mode_internal: ThemeMode = ThemeMode.DARK
+@export var theme_mode: ThemeMode = ThemeMode.DARK:
+	set = set_theme_mode,
+	get = get_theme_mode
 @export_group("Header")
 @export var headers: Array[String] = []
 @export var header_height: float = 35.0
@@ -119,6 +128,7 @@ var font_size = get_theme_default_font_size()
 
 func _ready():
 	self.focus_mode = Control.FOCUS_ALL # For input from keyboard
+	_theme_mode_internal = theme_mode
 	_row_select_column_enabled_internal = row_select_column_enabled
 	
 	_setup_editing_components()
@@ -149,7 +159,8 @@ func _ready():
 	self.anchor_top = 0.0
 	self.anchor_right = 1.0
 	self.anchor_bottom = 1.0
-		
+
+	_apply_theme_mode_colors(_theme_mode_internal)
 	queue_redraw()
 
 func _setup_filtering_components():
@@ -236,6 +247,91 @@ func _sync_focused_column_after_row_select_toggle(previous_enabled: bool) -> voi
 
 	if _focused_col >= _total_columns and _total_columns > 0:
 		_focused_col = _total_columns - 1
+
+func _apply_theme_mode_colors(mode: ThemeMode) -> void:
+	match mode:
+		ThemeMode.LIGHT:
+			_apply_light_theme_colors()
+		ThemeMode.DARK:
+			_apply_dark_theme_colors()
+		_:
+			_apply_dark_theme_colors()
+
+	_apply_editor_overlay_theme()
+	queue_redraw()
+
+func _apply_light_theme_colors() -> void:
+	default_font_color = Color("#303133")
+	header_color = Color("#f5f7fa")
+	header_filter_active_font_color = Color("#409eff")
+	grid_color = Color("#ebeef5")
+	selected_back_color = Color("#ecf5ff")
+	row_color = Color("#ffffff")
+	alternate_row_color = Color("#fafafa")
+
+	checkbox_checked_color = Color("#409eff")
+	checkbox_unchecked_color = Color("#ffffff")
+	checkbox_border_color = Color("#c0c4cc")
+	checkbox_checkmark_color = Color("#ffffff")
+
+	progress_bar_start_color = Color("#67c23a")
+	progress_bar_middle_color = Color("#e6a23c")
+	progress_bar_end_color = Color("#f56c6c")
+	progress_background_color = Color("#ebeef5")
+	progress_border_color = Color("#dcdfe6")
+	progress_text_color = Color("#303133")
+
+	button_bg_color = Color("#ffffff")
+	button_border_color = Color("#dcdfe6")
+	button_text_color = Color("#409eff")
+
+func _apply_dark_theme_colors() -> void:
+	default_font_color = Color("#e5eaf3")
+	header_color = Color("#1d1e1f")
+	header_filter_active_font_color = Color("#79bbff")
+	grid_color = Color("#303133")
+	selected_back_color = Color("#18222c")
+	row_color = Color("#141414")
+	alternate_row_color = Color("#1d1e1f")
+
+	checkbox_checked_color = Color("#409eff")
+	checkbox_unchecked_color = Color("#1d1e1f")
+	checkbox_border_color = Color("#606266")
+	checkbox_checkmark_color = Color("#ffffff")
+
+	progress_bar_start_color = Color("#67c23a")
+	progress_bar_middle_color = Color("#e6a23c")
+	progress_bar_end_color = Color("#f56c6c")
+	progress_background_color = Color("#262727")
+	progress_border_color = Color("#4c4d4f")
+	progress_text_color = Color("#e5eaf3")
+
+	button_bg_color = Color("#1d1e1f")
+	button_border_color = Color("#4c4d4f")
+	button_text_color = Color("#79bbff")
+
+func _apply_editor_overlay_theme() -> void:
+	if _edit_line_edit != null:
+		_edit_line_edit.add_theme_color_override("font_color", default_font_color)
+		_edit_line_edit.add_theme_color_override("background_color", row_color)
+		_edit_line_edit.add_theme_color_override("font_placeholder_color", default_font_color.darkened(0.35))
+		_edit_line_edit.add_theme_color_override("font_selected_color", Color("#ffffff"))
+		_edit_line_edit.add_theme_color_override("selection_color", checkbox_checked_color)
+		_edit_line_edit.add_theme_color_override("caret_color", checkbox_checked_color)
+		_edit_line_edit.add_theme_color_override("font_uneditable_color", default_font_color)
+		_edit_line_edit.add_theme_constant_override("outline_size", 1)
+		_edit_line_edit.add_theme_color_override("outline_color", grid_color)
+
+	if _filter_line_edit != null:
+		_filter_line_edit.add_theme_color_override("font_color", default_font_color)
+		_filter_line_edit.add_theme_color_override("background_color", row_color)
+		_filter_line_edit.add_theme_color_override("font_placeholder_color", default_font_color.darkened(0.35))
+		_filter_line_edit.add_theme_color_override("font_selected_color", Color("#ffffff"))
+		_filter_line_edit.add_theme_color_override("selection_color", checkbox_checked_color)
+		_filter_line_edit.add_theme_color_override("caret_color", checkbox_checked_color)
+		_filter_line_edit.add_theme_color_override("font_uneditable_color", default_font_color)
+		_filter_line_edit.add_theme_constant_override("outline_size", 1)
+		_filter_line_edit.add_theme_color_override("outline_color", grid_color)
 
 func _is_date_string(value: String) -> bool:
 	var date_regex = RegEx.new()
@@ -603,6 +699,21 @@ func set_row_select_column_enabled(enabled: bool) -> void:
 
 func is_row_select_column_enabled() -> bool:
 	return _row_select_column_enabled_internal
+
+func set_theme_mode(mode: ThemeMode) -> void:
+	if _theme_mode_internal == mode:
+		return
+	_theme_mode_internal = mode
+	_apply_theme_mode_colors(_theme_mode_internal)
+
+func get_theme_mode() -> ThemeMode:
+	return _theme_mode_internal
+
+func set_dark_mode(enabled: bool) -> void:
+	set_theme_mode(ThemeMode.DARK if enabled else ThemeMode.LIGHT)
+
+func is_dark_mode() -> bool:
+	return _theme_mode_internal == ThemeMode.DARK
 
 func fit_data_columns_to_control_width() -> void:
 	var data_column_count := _data_column_count()
